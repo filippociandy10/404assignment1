@@ -1,5 +1,8 @@
 #  coding: utf-8 
 import socketserver
+import webbrowser
+import os
+import socket
 
 # Copyright 2013 Abram Hindle, Eddie Antonio Santos
 # 
@@ -27,6 +30,8 @@ import socketserver
 # try: curl -v -X GET http://127.0.0.1:8080/
 
 
+BYTES_TO_READ = 4096
+
 class MyWebServer(socketserver.BaseRequestHandler):
     
     def handle(self):
@@ -34,13 +39,30 @@ class MyWebServer(socketserver.BaseRequestHandler):
         print ("Got a request of: %s\n" % self.data)
         self.request.sendall(bytearray("OK",'utf-8'))
 
+def handle_connection(conn,addr):
+    with conn:
+        print(f"Connected by: {addr}")
+        request = b""
+        while True:
+            data = conn.recv(BYTES_TO_READ)
+            if not data:
+                break
+            print(data)
+            request += data
+        print("request: ", request)
+    return
+
 if __name__ == "__main__":
     HOST, PORT = "localhost", 8080
 
     socketserver.TCPServer.allow_reuse_address = True
     # Create the server, binding to localhost on port 8080
     server = socketserver.TCPServer((HOST, PORT), MyWebServer)
-
+    socket_server = server.socket
+    socket_server.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR,1)
+    socket_server.listen()
+    conn, addr = socket_server.accept()
+    handle_connection(conn,addr)
     # Activate the server; this will keep running until you
     # interrupt the program with Ctrl-C
     server.serve_forever()
