@@ -37,20 +37,9 @@ class MyWebServer(socketserver.BaseRequestHandler):
     def handle(self):
         self.data = self.request.recv(1024).strip()
         print ("Got a request of: %s\n" % self.data)
-        self.request.sendall(bytearray("OK",'utf-8'))
-
-def handle_connection(conn,addr):
-    with conn:
-        print(f"Connected by: {addr}")
-        request = b""
-        while True:
-            data = conn.recv(BYTES_TO_READ)
-            if not data:
-                break
-            print(data)
-            request += data
-        print("request: ", request)
-    return
+        response = "HTTP/1.1 200 OK\r\nContent-Length : 2\r\nOK"
+        self.request.sendall(bytearray(response,'utf-8'))
+        print(response)
 
 if __name__ == "__main__":
     HOST, PORT = "localhost", 8080
@@ -58,11 +47,12 @@ if __name__ == "__main__":
     socketserver.TCPServer.allow_reuse_address = True
     # Create the server, binding to localhost on port 8080
     server = socketserver.TCPServer((HOST, PORT), MyWebServer)
-    socket_server = server.socket
-    socket_server.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR,1)
-    socket_server.listen()
-    conn, addr = socket_server.accept()
-    handle_connection(conn,addr)
+    
+    # socket_server = server.socket
+    # socket_server.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR,1)
+    # socket_server.listen()
+    # conn, addr = socket_server.accept()
+    # handle_connection(conn,addr)
     # Activate the server; this will keep running until you
     # interrupt the program with Ctrl-C
     server.serve_forever()
