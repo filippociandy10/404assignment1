@@ -37,13 +37,11 @@ class MyWebServer(socketserver.BaseRequestHandler):
     def handle(self):
         self.data = self.request.recv(1024).strip()
         print ("Got a request of: %s\n" % self.data)
-        response = "HTTP/1.1 200 OK\r\nContent-Length : 2\r\nOK"
+        response = "HTTP/1.1 200 OK\r\nContent-Length:2\r\n\r\nOK"
         self.request.sendall(bytearray(response,'utf-8'))
         print(response)
-
 if __name__ == "__main__":
     HOST, PORT = "localhost", 8080
-
     socketserver.TCPServer.allow_reuse_address = True
     # Create the server, binding to localhost on port 8080
     server = socketserver.TCPServer((HOST, PORT), MyWebServer)
